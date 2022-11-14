@@ -47,3 +47,24 @@ describe("/api/articles", () => {
     });
   });
 });
+
+describe("/api/articles/:article_id", () => {
+  describe("GET", () => {
+    test("responds with an article object which matches the given id and contains the expected properties", () => {
+      return request(app)
+        .get("/api/articles/1")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.article).toMatchObject({
+            article_id: 1,
+            title: expect.any(String),
+            author: expect.any(String),
+            topic: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            body: expect.any(String),
+          });
+        });
+    });
+  });
+});
