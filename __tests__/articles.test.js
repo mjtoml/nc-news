@@ -52,11 +52,11 @@ describe("/api/articles/:article_id", () => {
   describe("GET", () => {
     test("responds with an article object which matches the given id and contains the expected properties", () => {
       return request(app)
-        .get("/api/articles/1")
+        .get("/api/articles/3")
         .expect(200)
         .then(({ body }) => {
           expect(body.article).toMatchObject({
-            article_id: 1,
+            article_id: 3,
             title: expect.any(String),
             author: expect.any(String),
             topic: expect.any(String),
@@ -64,6 +64,24 @@ describe("/api/articles/:article_id", () => {
             votes: expect.any(Number),
             body: expect.any(String),
           });
+        });
+    });
+
+    test("responds with a 400 status code when given an invalid article_id", () => {
+      return request(app)
+        .get("/api/articles/dog")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Invalid type");
+        });
+    });
+
+    test("responds with a 404 status code when given a valid but non-existent article_id", () => {
+      return request(app)
+        .get("/api/articles/999999")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Article not found");
         });
     });
   });
