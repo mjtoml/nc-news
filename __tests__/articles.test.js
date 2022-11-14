@@ -133,7 +133,16 @@ describe("/api/articles/:article_id/comments", () => {
         .get("/api/articles/999999/comments")
         .expect(404)
         .then(({ body }) => {
-          expect(body.msg).toBe("No comments found");
+          expect(body.msg).toBe("Article not found");
+        });
+    });
+
+    test("responds with an empty array when the article exists but has no comments", () => {
+      return request(app)
+        .get("/api/articles/2/comments")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.comments).toHaveLength(0);
         });
     });
   });
