@@ -14,7 +14,7 @@ afterAll(() => {
 
 describe("/api/topics", () => {
   describe("GET", () => {
-    test("should respond with 200 and an array of topic objects each with a slug and description property", () => {
+    test("responds with 200 and an array of topic objects each with a slug and description property", () => {
       return request(app)
         .get("/api/topics")
         .expect(200)
