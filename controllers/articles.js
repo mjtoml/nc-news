@@ -25,7 +25,7 @@ exports.getArticleById = (req, res, next) => {
 exports.patchArticleById = (req, res, next) => {
   const { article_id } = req.params;
   const { inc_votes } = req.body;
-  if (!inc_votes) return next({ status: 400, msg: "Bad request" });
+  if (!inc_votes) return next({ status: 400, msg: "inc_votes required" });
   updateArticleById(article_id, inc_votes)
     .then((article) => {
       if (!article) throw { status: 404, msg: "Article not found" };

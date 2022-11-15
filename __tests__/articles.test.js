@@ -168,7 +168,7 @@ describe("/api/articles/:article_id", () => {
         .send({})
         .expect(400)
         .then(({ body }) => {
-          expect(body.msg).toBe("Bad request");
+          expect(body.msg).toBe("inc_votes required");
         });
     });
 
