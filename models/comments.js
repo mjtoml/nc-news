@@ -20,4 +20,4 @@ exports.insertComment = (article_id, username, body) => {
     .then((comment) => {
       return comment.rows[0];
     });
-});
+};
