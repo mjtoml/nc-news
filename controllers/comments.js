@@ -1,6 +1,7 @@
 const {
   selectCommentsByArticleId,
   insertComment,
+  deleteCommentById,
 } = require("../models/comments");
 const { exists } = require("../models/utils");
 
@@ -24,6 +25,16 @@ exports.postComment = (req, res, next) => {
   insertComment(article_id, username, body)
     .then((comment) => {
       res.status(201).send({ comment });
+    })
+    .catch(next);
+};
+
+exports.deleteComment = (req, res, next) => {
+  const { comment_id } = req.params;
+  deleteCommentById(comment_id)
+    .then((comment) => {
+      if (!comment) throw { status: 404, msg: "Comment not found" };
+      res.sendStatus(204);
     })
     .catch(next);
 };
