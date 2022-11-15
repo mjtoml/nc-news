@@ -2,15 +2,16 @@ const {
   selectCommentsByArticleId,
   insertComment,
 } = require("../models/comments");
+const { exists } = require("../models/utils");
 
 exports.getCommentsByArticleId = (req, res, next) => {
   const { article_id } = req.params;
-  selectCommentsByArticleId(article_id)
-    .then((comments) => {
-      if (!comments.length) throw { status: 404, msg: "Article not found" };
-      res
-        .status(200)
-        .send({ comments: comments.filter((comment) => comment.comment_id) });
+  const articleExists = exists("articles", "article_id", article_id);
+  const comments = selectCommentsByArticleId(article_id);
+  Promise.all([articleExists, comments])
+    .then(([articleExists, comments]) => {
+      if (!articleExists) throw { status: 404, msg: "Article not found" };
+      res.status(200).send({ comments });
     })
     .catch(next);
 };
