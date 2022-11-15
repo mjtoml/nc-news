@@ -1,13 +1,41 @@
 const db = require("../db/connection");
+const format = require("pg-format");
+const { exists } = require("./utils");
 
-exports.selectArticles = () => {
-  return db
-    .query(
-      "SELECT articles.*, COUNT(comment_id)::int as comment_count FROM articles LEFT JOIN comments USING (article_id) GROUP BY article_id ORDER BY created_at DESC;"
-    )
-    .then((articles) => {
-      return articles.rows;
-    });
+exports.selectArticles = async (
+  topic,
+  sort_by = "created_at",
+  order = "DESC"
+) => {
+  order = order.toUpperCase();
+  const sortable = [
+    "article_id",
+    "title",
+    "topic",
+    "author",
+    "created_at",
+    "votes",
+    "comment_count",
+  ];
+
+  if (!sortable.includes(sort_by))
+    throw { status: 400, msg: "Invalid sort_by query" };
+  if (order !== "ASC" && order !== "DESC")
+    throw { status: 400, msg: "Invalid order query" };
+  if (topic && !(await exists("topics", "slug", topic)))
+    throw { status: 404, msg: "Topic not found" };
+
+  const where = topic ? format("WHERE topic = %L", topic) : "";
+  const sql = format(
+    "SELECT articles.*, COUNT(comment_id)::int as comment_count FROM articles LEFT JOIN comments USING (article_id) %s GROUP BY article_id ORDER BY %I %s;",
+    where,
+    sort_by,
+    order
+  );
+
+  return db.query(sql).then((articles) => {
+    return articles.rows;
+  });
 };
 
 exports.selectArticleById = (article_id) => {
