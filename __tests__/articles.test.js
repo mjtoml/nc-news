@@ -63,6 +63,7 @@ describe("/api/articles/:article_id", () => {
             created_at: expect.any(String),
             votes: expect.any(Number),
             body: expect.any(String),
+            comment_count: expect.any(Number),
           });
         });
     });
