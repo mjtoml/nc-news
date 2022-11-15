@@ -6,22 +6,108 @@
     "description": "serves an array of all topics",
     "queries": [],
     "exampleResponse": {
-      "topics": [{ "slug": "football", "description": "Footie!" }]
+      "topics": [
+        {
+          "slug": "football",
+          "description": "Footie!"
+        }
+      ]
     }
   },
   "GET /api/articles": {
-    "description": "serves an array of all topics",
-    "queries": ["author", "topic", "sort_by", "order"],
+    "description": "serves an array of all topics sorted by date descending by default",
+    "queries": [
+      "topic",
+      "sort_by",
+      "order"
+    ],
     "exampleResponse": {
       "articles": [
         {
+          "article_id": 63,
           "title": "Seafood substitutions are increasing",
           "topic": "cooking",
           "author": "weegembump",
           "body": "Text from the article..",
-          "created_at": 1527695953341
+          "created_at": 1527695953341,
+          "votes": 12,
+          "comment_count": 4
         }
       ]
     }
+  },
+  "GET /api/articles/:article_id": {
+    "description": "serves a json representation of the article with the given id",
+    "queries": [],
+    "exampleResponse": {
+      "article_id": 63,
+      "title": "Seafood substitutions are increasing",
+      "topic": "cooking",
+      "author": "weegembump",
+      "body": "Text from the article..",
+      "created_at": 1527695953341,
+      "votes": 12,
+      "comment_count": 4
+    }
+  },
+  "GET /api/articles/:article_id/comments": {
+    "description": "serves an array of comments for the given article",
+    "queries": [],
+    "exampleResponse": [
+      {
+        "comment_id": 3,
+        "votes": 4,
+        "created_at": 1527695953341,
+        "author": "weegembump",
+        "body": "Text from the comment..."
+      }
+    ]
+  },
+  "POST /api/articles/:article_id/comments": {
+    "description": "posts a comment associated with the given article and responds with the newly posted comment",
+    "exampleRequestBody": {
+      "username": "weegembump",
+      "body": "Text for comment..."
+    },
+    "exampleResponse": {
+      "comment_id": 8,
+      "author": "weegembump",
+      "body": "Text from the comment...",
+      "votes": 0,
+      "created_at": 1527695953344,
+      "article_id": 4
+    }
+  },
+  "PATCH /api/articles/:article_id": {
+    "description": "increments the votes for a given article and responds with the updated article",
+    "exampleRequestBody": {
+      "inc_votes": 3
+    },
+    "exampleResponse": {
+      "article_id": 63,
+      "title": "Seafood substitutions are increasing",
+      "topic": "cooking",
+      "author": "weegembump",
+      "body": "Text from the article..",
+      "created_at": 1527695953341,
+      "votes": 7,
+      "comment_count": 4
+    }
+  },
+  "GET /api/users": {
+    "description": "serves an array of all users",
+    "queries": [],
+    "exampleResponse": {
+      "topics": [
+        {
+          "username": "weegembump",
+          "name": "Jeff",
+          "avatar_url": "https://avatar-url.avatarsite"
+        }
+      ]
+    }
+  },
+  "DELETE /api/comments/:comment_id": {
+    "description": "deletes the given comment and responds only with a 204 status code"
   }
 }
