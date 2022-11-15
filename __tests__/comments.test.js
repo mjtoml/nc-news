@@ -1,3 +1,17 @@
+const db = require("../db/connection");
+const seed = require("../db/seeds/seed");
+const request = require("supertest");
+const app = require("../app");
+const testData = require("../db/data/test-data");
+
+beforeEach(() => {
+  return seed(testData);
+});
+
+afterAll(() => {
+  return db.end();
+});
+
 describe("POST", () => {
   test("responds with 201 and the new comment", () => {
     const comment = {
