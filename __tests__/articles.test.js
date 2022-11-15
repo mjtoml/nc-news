@@ -85,4 +85,107 @@ describe("/api/articles/:article_id", () => {
         });
     });
   });
+
+  describe("PATCH", () => {
+    test("responds with 200 and the updated article", () => {
+      return request(app)
+        .patch("/api/articles/3")
+        .send({ inc_votes: 2 })
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.article).toMatchObject({
+            article_id: 3,
+            votes: 2,
+          });
+        });
+    });
+
+    test("responds with 200 and the updated article when given a negative number", () => {
+      return request(app)
+        .patch("/api/articles/3")
+        .send({ inc_votes: -3 })
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.article).toMatchObject({
+            article_id: 3,
+            votes: -3,
+          });
+        });
+    });
+
+    test("consecutive votes increment/decrement the number not overwrite", () => {
+      return request(app)
+        .patch("/api/articles/3")
+        .send({ inc_votes: 2 })
+        .expect(200)
+        .then(() => {
+          return request(app)
+            .patch("/api/articles/3")
+            .send({ inc_votes: 8 })
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.article).toMatchObject({
+                article_id: 3,
+                votes: 10,
+              });
+            });
+        });
+    });
+
+    test("responds with 400 when given an invalid article_id", () => {
+      return request(app)
+        .patch("/api/articles/dog")
+        .send({ inc_votes: 1 })
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Invalid type");
+        });
+    });
+
+    test("responds with 404 when given a valid but non-existent article_id", () => {
+      return request(app)
+        .patch("/api/articles/999999")
+        .send({ inc_votes: 1 })
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Article not found");
+        });
+    });
+
+    test("responds with 400 when given an invalid inc_votes", () => {
+      return request(app)
+        .patch("/api/articles/3")
+        .send({ inc_votes: "dog" })
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Invalid type");
+        });
+    });
+
+    test("responds with 400 when inc_votes not given", () => {
+      return request(app)
+        .patch("/api/articles/3")
+        .send({})
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Bad request");
+        });
+    });
+
+    test("ignores additional properties", () => {
+      const update = { inc_votes: 1, title: "dog", new: "test" };
+      return request(app)
+        .patch("/api/articles/3")
+        .send(update)
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.article).toMatchObject({
+            article_id: 3,
+            votes: 1,
+          });
+          expect(body.article.title).not.toBe(update.title);
+          expect(body.article.new).toBeUndefined();
+        });
+    });
+  });
 });
