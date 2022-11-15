@@ -5,6 +5,7 @@ const {
   getCommentsByArticleId,
   postComment,
 } = require("./controllers/comments");
+const { getUsers } = require("./controllers/users");
 
 const app = express();
 app.use(express.json());
@@ -16,6 +17,8 @@ app.get("/api/articles/:article_id", getArticleById);
 
 app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
 app.post("/api/articles/:article_id/comments", postComment);
+
+app.get("/api/users", getUsers);
 
 app.use("*", (req, res, next) => {
   next({ status: 404, msg: "Endpoint does not exist" });
