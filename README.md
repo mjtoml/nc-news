@@ -4,13 +4,9 @@
 
 ## Summary
 
----
-
 A simple news API which interacts with a Postgres database to serve information about news articles. The full list of endpoints can be found by making a GET request to the /api endpoint.
 
 ## Setup
-
----
 
 ### **1. Clone**
 
