@@ -177,4 +177,113 @@ describe("/api/comments/:comment_id", () => {
         });
     });
   });
+
+  describe("PATCH", () => {
+    test("responds with 200 and the updated comment", () => {
+      const newVote = { inc_votes: 1 };
+      return request(app)
+        .patch("/api/comments/1")
+        .send(newVote)
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.comment).toMatchObject({
+            comment_id: 1,
+            votes: 17,
+          });
+        });
+    });
+
+    test("responds with 200 and the updated comment when inc_votes is negative", () => {
+      const newVote = { inc_votes: -2 };
+      return request(app)
+        .patch("/api/comments/1")
+        .send(newVote)
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.comment).toMatchObject({
+            comment_id: 1,
+            votes: 14,
+          });
+        });
+    });
+
+    test("subsequent PATCH requests increment the votes, not overwrite", () => {
+      const newVote = { inc_votes: 3 };
+      return request(app)
+        .patch("/api/comments/1")
+        .send(newVote)
+        .expect(200)
+        .then(() => {
+          return request(app)
+            .patch("/api/comments/1")
+            .send(newVote)
+            .expect(200);
+        })
+        .then(({ body }) => {
+          expect(body.comment).toMatchObject({
+            comment_id: 1,
+            votes: 22,
+          });
+        });
+    });
+
+    test("responds with 400 if comment_id is invalid", () => {
+      const newVote = { inc_votes: 1 };
+      return request(app)
+        .patch("/api/comments/dog")
+        .send(newVote)
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Invalid type");
+        });
+    });
+
+    test("responds with 404 if comment_id is valid but doesn't exist", () => {
+      const newVote = { inc_votes: 1 };
+      return request(app)
+        .patch("/api/comments/999999")
+        .send(newVote)
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Comment not found");
+        });
+    });
+
+    test("responds with 400 if the inc_votes is missing", () => {
+      return request(app)
+        .patch("/api/comments/1")
+        .send({})
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("inc_votes required");
+        });
+    });
+
+    test("responds with 400 if the inc_votes is invalid", () => {
+      const newVote = { inc_votes: "dog" };
+      return request(app)
+        .patch("/api/comments/1")
+        .send(newVote)
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Invalid type");
+        });
+    });
+
+    test("ignores additional properties", () => {
+      const newVote = { inc_votes: 1, test: "test", author: "newAuthor" };
+      return request(app)
+        .patch("/api/comments/1")
+        .send(newVote)
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.comment).toMatchObject({
+            comment_id: 1,
+            votes: 17,
+          });
+          expect(body.comment.author).not.toBe("newAuthor");
+          expect(body.comment.test).toBeUndefined();
+        });
+    });
+  });
 });

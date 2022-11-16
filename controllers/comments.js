@@ -2,6 +2,7 @@ const {
   selectCommentsByArticleId,
   insertComment,
   deleteCommentById,
+  updateComment,
 } = require("../models/comments");
 const { exists } = require("../models/utils");
 
@@ -35,6 +36,19 @@ exports.deleteComment = (req, res, next) => {
     .then((comment) => {
       if (!comment) throw { status: 404, msg: "Comment not found" };
       res.sendStatus(204);
+    })
+    .catch(next);
+};
+
+exports.patchComment = (req, res, next) => {
+  const { comment_id } = req.params;
+  const { inc_votes } = req.body;
+  if (inc_votes === undefined)
+    return next({ status: 400, msg: "inc_votes required" });
+  updateComment(comment_id, inc_votes)
+    .then((comment) => {
+      if (!comment) throw { status: 404, msg: "Comment not found" };
+      res.status(200).send({ comment });
     })
     .catch(next);
 };
