@@ -1,4 +1,8 @@
+ARG DATABASE_URL
 FROM node:16
+
+ENV NODE_ENV=production
+ENV DATABASE_URL=$DATABASE_URL
 
 # Create app directory
 WORKDIR /usr/src/app
