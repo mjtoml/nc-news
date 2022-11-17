@@ -86,6 +86,8 @@ describe("/api/articles/:article_id/comments", () => {
     test("responds with 400 if the p query is invalid", () => {});
 
     test("responds with 404 if the page specified does not exist", () => {});
+
+    test("next_page should be null if there are no more pages", () => {});
   });
 
   describe("POST", () => {

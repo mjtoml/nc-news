@@ -34,7 +34,7 @@ exports.selectArticles = async (
   );
 
   return db.query(sql).then((articles) => {
-    return articles.rows;
+    return [articles.rows, articles.rowCount];
   });
 };
 

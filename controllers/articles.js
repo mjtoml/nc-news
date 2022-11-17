@@ -8,9 +8,29 @@ const {
 
 exports.getArticles = (req, res, next) => {
   const { topic, sort_by, order } = req.query;
+  const limit = +req.query.limit || 10;
+  const current_page = +req.query.p || 1;
   selectArticles(topic, sort_by, order)
-    .then((articles) => {
-      res.status(200).send({ articles });
+    .then(([articles, total_count]) => {
+      const pageStart = (current_page - 1) * limit;
+      const pageEnd = pageStart + limit;
+      if (pageStart > total_count) throw { status: 404, msg: "Page not found" };
+
+      let next_page = null;
+      if (pageEnd < total_count) {
+        const nextURL = new URL(
+          req.protocol + "://" + req.get("host") + req.originalUrl
+        );
+        nextURL.searchParams.set("p", current_page + 1);
+        next_page = nextURL.href;
+      }
+
+      res.status(200).send({
+        articles: articles.slice(pageStart, pageEnd),
+        total_count,
+        current_page,
+        next_page,
+      });
     })
     .catch(next);
 };
