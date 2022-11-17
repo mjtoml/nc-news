@@ -29,4 +29,64 @@ describe("/api/topics", () => {
         });
     });
   });
+
+  describe("POST", () => {
+    test("responds with 201 and the new topic", () => {
+      const newTopic = {
+        slug: "test",
+        description: "Test description",
+      };
+      return request(app)
+        .post("/api/topics")
+        .send(newTopic)
+        .expect(201)
+        .then(({ body }) => {
+          expect(body.topic).toMatchObject(newTopic);
+        });
+    });
+
+    test("responds with 400 when slug is not given", () => {
+      const newTopic = {
+        description: "test",
+      };
+      return request(app)
+        .post("/api/topics")
+        .send(newTopic)
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Required property missing");
+        });
+    });
+
+    test("responds with 201 when description is not given, defaulting to a null description", () => {
+      const newTopic = {
+        slug: "test",
+      };
+      return request(app)
+        .post("/api/topics")
+        .send(newTopic)
+        .expect(201)
+        .then(({ body }) => {
+          expect(body.topic).toMatchObject({
+            slug: "test",
+            description: null,
+          });
+        });
+    });
+
+    test("ignores additional properties", () => {
+      const newTopic = {
+        slug: "test",
+        description: "Test description",
+        test: "test",
+      };
+      return request(app)
+        .post("/api/topics")
+        .send(newTopic)
+        .expect(201)
+        .then(({ body }) => {
+          expect(body.topic).not.toHaveProperty("test");
+        });
+    });
+  });
 });
