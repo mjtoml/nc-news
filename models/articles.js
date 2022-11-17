@@ -59,3 +59,14 @@ exports.updateArticleById = (article_id, inc_votes) => {
       return article.rows[0];
     });
 };
+
+exports.insertArticle = (title, body, topic, author) => {
+  return db
+    .query(
+      "INSERT INTO articles (title, body, topic, author) VALUES ($1, $2, $3, $4) RETURNING *, 0 as comment_count;",
+      [title, body, topic, author]
+    )
+    .then((article) => {
+      return article.rows[0];
+    });
+};
