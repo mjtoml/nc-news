@@ -4,6 +4,7 @@ const {
   unknownRoute,
   customError,
   dbTypeError,
+  nullError,
   dbForeignKeyError,
   serverError,
 } = require("./errors");
@@ -16,6 +17,7 @@ app.use("/api", apiRouter);
 app.use(unknownRoute);
 app.use(customError);
 app.use(dbTypeError);
+app.use(nullError);
 app.use(dbForeignKeyError);
 app.use(serverError);
 

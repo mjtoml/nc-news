@@ -14,8 +14,15 @@ exports.dbTypeError = (err, req, res, next) => {
   else next(err);
 };
 
+exports.nullError = (err, req, res, next) => {
+  if (err.code === "23502")
+    res.status(400).send({ msg: "Required property missing" });
+  else next(err);
+};
+
 exports.dbForeignKeyError = (err, req, res, next) => {
-  if (err.code === "23503") res.status(404).send({ msg: "Not found" });
+  if (err.code === "23503")
+    res.status(404).send({ msg: "Linking property does not exist" });
   else next(err);
 };
 
