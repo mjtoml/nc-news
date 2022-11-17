@@ -388,4 +388,33 @@ describe("/api/articles/:article_id", () => {
         });
     });
   });
+
+  describe("DELETE", () => {
+    test("responds with 204 and an empty body", () => {
+      return request(app)
+        .delete("/api/articles/1")
+        .expect(204)
+        .then(({ body }) => {
+          expect(body).toEqual({});
+        });
+    });
+
+    test("responds with 400 if article_id is invalid", () => {
+      return request(app)
+        .delete("/api/articles/dog")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Invalid type");
+        });
+    });
+
+    test("responds with 404 if article_id is valid but doesn't exist", () => {
+      return request(app)
+        .delete("/api/articles/999999")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Article not found");
+        });
+    });
+  });
 });

@@ -3,6 +3,7 @@ const {
   selectArticleById,
   updateArticleById,
   insertArticle,
+  deleteArticleById,
 } = require("../models/articles");
 
 exports.getArticles = (req, res, next) => {
@@ -40,6 +41,16 @@ exports.postArticle = (req, res, next) => {
   insertArticle(title, body, topic, author)
     .then((article) => {
       res.status(201).send({ article });
+    })
+    .catch(next);
+};
+
+exports.deleteArticle = (req, res, next) => {
+  const { article_id } = req.params;
+  deleteArticleById(article_id)
+    .then((article) => {
+      if (!article) throw { status: 404, msg: "Article not found" };
+      res.sendStatus(204);
     })
     .catch(next);
 };
