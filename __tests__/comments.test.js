@@ -87,6 +87,8 @@ describe("/api/articles/:article_id/comments", () => {
             comment_id: expect.any(Number),
             author: comment.username,
             body: comment.body,
+            votes: 0,
+            created_at: expect.any(String),
           });
         });
     });
@@ -115,7 +117,7 @@ describe("/api/articles/:article_id/comments", () => {
         .send(comment)
         .expect(404)
         .then(({ body }) => {
-          expect(body.msg).toBe("Not found");
+          expect(body.msg).toBe("Linking property does not exist");
         });
     });
 
@@ -129,7 +131,7 @@ describe("/api/articles/:article_id/comments", () => {
         .send(comment)
         .expect(404)
         .then(({ body }) => {
-          expect(body.msg).toBe("Not found");
+          expect(body.msg).toBe("Linking property does not exist");
         });
     });
 
@@ -142,7 +144,22 @@ describe("/api/articles/:article_id/comments", () => {
         .send(comment)
         .expect(400)
         .then(({ body }) => {
-          expect(body.msg).toBe("Incomplete comment");
+          expect(body.msg).toBe("Required property missing");
+        });
+    });
+
+    test("ignores any additional properties", () => {
+      const comment = {
+        username: "lurker",
+        body: "Test comment",
+        test: "test",
+      };
+      return request(app)
+        .post("/api/articles/3/comments")
+        .send(comment)
+        .expect(201)
+        .then(({ body }) => {
+          expect(body.comment).not.toHaveProperty("test");
         });
     });
   });
@@ -255,7 +272,7 @@ describe("/api/comments/:comment_id", () => {
         .send({})
         .expect(400)
         .then(({ body }) => {
-          expect(body.msg).toBe("inc_votes required");
+          expect(body.msg).toBe("Required property missing");
         });
     });
 

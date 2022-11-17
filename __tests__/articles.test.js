@@ -157,6 +157,94 @@ describe("/api/articles", () => {
         });
     });
   });
+
+  describe("POST", () => {
+    test("responds with 201 and the created article containing additional properties which were not passed", () => {
+      const newArticle = {
+        title: "Test Article",
+        author: "butter_bridge",
+        topic: "cats",
+        body: "Test body...",
+      };
+      return request(app)
+        .post("/api/articles")
+        .send(newArticle)
+        .expect(201)
+        .then(({ body }) => {
+          expect(body.article).toMatchObject({
+            article_id: expect.any(Number),
+            created_at: expect.any(String),
+            votes: 0,
+            comment_count: 0,
+            ...newArticle,
+          });
+        });
+    });
+
+    test("responds with 404 if the author does not exist", () => {
+      const newArticle = {
+        title: "Test Article",
+        author: "dog",
+        topic: "cats",
+        body: "Test body...",
+      };
+      return request(app)
+        .post("/api/articles")
+        .send(newArticle)
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Linking property does not exist");
+        });
+    });
+
+    test("responds with 404 if the topic does not exist", () => {
+      const newArticle = {
+        title: "Test Article",
+        author: "butter_bridge",
+        topic: "dog",
+        body: "Test body...",
+      };
+      return request(app)
+        .post("/api/articles")
+        .send(newArticle)
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Linking property does not exist");
+        });
+    });
+
+    test("responds with 400 if the request body is missing required properties", () => {
+      const newArticle = {
+        title: "Test Article",
+        topic: "cats",
+        body: "Test body...",
+      };
+      return request(app)
+        .post("/api/articles")
+        .send(newArticle)
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Required property missing");
+        });
+    });
+
+    test("ignores any additional properties", () => {
+      const newArticle = {
+        title: "Test Article",
+        author: "butter_bridge",
+        topic: "cats",
+        body: "Test Body",
+        test: "test",
+      };
+      return request(app)
+        .post("/api/articles")
+        .send(newArticle)
+        .expect(201)
+        .then(({ body }) => {
+          expect(body.article).not.toHaveProperty("test");
+        });
+    });
+  });
 });
 
 describe("/api/articles/:article_id", () => {
@@ -280,7 +368,7 @@ describe("/api/articles/:article_id", () => {
         .send({})
         .expect(400)
         .then(({ body }) => {
-          expect(body.msg).toBe("inc_votes required");
+          expect(body.msg).toBe("Required property missing");
         });
     });
 

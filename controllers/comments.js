@@ -21,8 +21,6 @@ exports.getCommentsByArticleId = (req, res, next) => {
 exports.postComment = (req, res, next) => {
   const { article_id } = req.params;
   const { username, body } = req.body;
-  if (!username || !body)
-    return next({ status: 400, msg: "Incomplete comment" });
   insertComment(article_id, username, body)
     .then((comment) => {
       res.status(201).send({ comment });
@@ -43,8 +41,6 @@ exports.deleteComment = (req, res, next) => {
 exports.patchComment = (req, res, next) => {
   const { comment_id } = req.params;
   const { inc_votes } = req.body;
-  if (inc_votes === undefined)
-    return next({ status: 400, msg: "inc_votes required" });
   updateComment(comment_id, inc_votes)
     .then((comment) => {
       if (!comment) throw { status: 404, msg: "Comment not found" };

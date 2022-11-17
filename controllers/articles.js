@@ -2,6 +2,7 @@ const {
   selectArticles,
   selectArticleById,
   updateArticleById,
+  insertArticle,
 } = require("../models/articles");
 
 exports.getArticles = (req, res, next) => {
@@ -26,11 +27,19 @@ exports.getArticleById = (req, res, next) => {
 exports.patchArticleById = (req, res, next) => {
   const { article_id } = req.params;
   const { inc_votes } = req.body;
-  if (!inc_votes) return next({ status: 400, msg: "inc_votes required" });
   updateArticleById(article_id, inc_votes)
     .then((article) => {
       if (!article) throw { status: 404, msg: "Article not found" };
       res.status(200).send({ article });
+    })
+    .catch(next);
+};
+
+exports.postArticle = (req, res, next) => {
+  const { title, body, topic, author } = req.body;
+  insertArticle(title, body, topic, author)
+    .then((article) => {
+      res.status(201).send({ article });
     })
     .catch(next);
 };
