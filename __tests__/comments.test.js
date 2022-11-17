@@ -70,6 +70,22 @@ describe("/api/articles/:article_id/comments", () => {
           expect(body.comments).toHaveLength(0);
         });
     });
+
+    test("accepts a limit query which limits the number of responses", () => {});
+
+    test("limit query defaults to 10", () => {});
+
+    test("accepts a p query which specifies the page at which to start", () => {});
+
+    test("p query defaults to 1", () => {});
+
+    test("responds with a total_count property displaying the total number of articles", () => {});
+
+    test("responds with 400 if the limit query is invalid", () => {});
+
+    test("responds with 400 if the p query is invalid", () => {});
+
+    test("responds with 404 if the page specified does not exist", () => {});
   });
 
   describe("POST", () => {

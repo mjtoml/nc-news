@@ -156,6 +156,67 @@ describe("/api/articles", () => {
           });
         });
     });
+
+    test("accepts a limit query which limits the number of responses", () => {
+      return request(app)
+        .get("/api/articles?limit=5")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.articles).toHaveLength(5);
+        });
+    });
+
+    test("limit query defaults to 10", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.articles).toHaveLength(10);
+        });
+    });
+
+    test("accepts a p query which specifies the page at which to start, defaulting to 1", () => {
+      return request(app)
+        .get("/api/articles?sort_by=article_id&limit=2")
+        .expect(200)
+        .then(({ body: { articles, current_page, next_page } }) => {
+          expect(current_page).toBe(1);
+          expect(articles[0].article_id).toBe(1);
+          const secondPage = new URL(next_page);
+          return request(app)
+            .get(secondPage.pathname + secondPage.search)
+            .expect(200);
+        })
+        .then(({ body: { articles, current_page, next_page } }) => {
+          expect(current_page).toBe(2);
+          expect(articles[0].article_id).toBe(3);
+          const thirdPage = new URL(next_page);
+          return request(app)
+            .get(thirdPage.pathname + thirdPage.search)
+            .expect(200);
+        })
+        .then(({ body: { articles, current_page } }) => {
+          expect(current_page).toBe(3);
+          expect(articles[0].article_id).toBe(5);
+        });
+    });
+
+    test("responds with a total_count property displaying the total number of filtered articles, discounting the limit", () => {
+      return request(app)
+        .get("/api/articles?topic=mitch&limit=5&p=2")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.total_count).toBe(10);
+        });
+    });
+
+    test("responds with 400 if the limit query is invalid", () => {});
+
+    test("responds with 400 if the p query is invalid", () => {});
+
+    test("responds with 404 if the page specified does not exist", () => {});
+
+    test.todo("next_page should be null if there are no more pages");
   });
 
   describe("POST", () => {
