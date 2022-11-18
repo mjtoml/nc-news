@@ -210,21 +210,25 @@ describe("/api/articles", () => {
         });
     });
 
-    test("responds with default limit if the limit query is invalid", () => {
+    test("responds with 400 if the limit query is invalid", () => {
       return request(app)
-        .get("/api/articles")
-        .expect(200)
+        .get("/api/articles?limit=0")
+        .expect(400)
         .then(({ body }) => {
-          expect(body.articles).toHaveLength(10);
+          expect(body.msg).toBe("Invalid limit or p (page) query");
+          return request(app).get("/api/articles").expect(200);
+        })
+        .then(({ body }) => {
+          expect(body.articles).not.toHaveLength(0);
         });
     });
 
-    test("responds with page 1 if the p query is invalid", () => {
+    test("responds with 400 if the p query is invalid", () => {
       return request(app)
-        .get("/api/articles")
-        .expect(200)
+        .get("/api/articles?p=0")
+        .expect(400)
         .then(({ body }) => {
-          expect(body.current_page).toBe(1);
+          expect(body.msg).toBe("Invalid limit or p (page) query");
         });
     });
 

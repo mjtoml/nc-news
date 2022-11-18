@@ -5,25 +5,29 @@ const {
   insertArticle,
   deleteArticleById,
 } = require("../models/articles");
+const { nextPageURL } = require("./utils");
 
 exports.getArticles = (req, res, next) => {
-  const { topic, sort_by, order } = req.query;
-  const limit = +req.query.limit || 10;
-  const current_page = +req.query.p || 1;
-  selectArticles(topic, sort_by, order)
-    .then(([articles, total_count]) => {
-      const pageStart = (current_page - 1) * limit;
-      const pageEnd = pageStart + limit;
-      if (pageStart > total_count) throw { status: 404, msg: "Page not found" };
+  const {
+    topic,
+    sort_by = "created_at",
+    order = "DESC",
+    limit = 10,
+    p = 1,
+  } = req.query;
 
-      let next_page = null;
-      if (pageEnd < total_count) {
-        const nextURL = new URL(
-          req.protocol + "://" + req.get("host") + req.originalUrl
-        );
-        nextURL.searchParams.set("p", current_page + 1);
-        next_page = nextURL.href;
-      }
+  if (!(p > 0) || !(limit > 0))
+    throw { status: 400, msg: "Invalid limit or p (page) query" };
+
+  selectArticles(topic, sort_by, order.toUpperCase())
+    .then(({ articles, total_count }) => {
+      const current_page = Number(p);
+      const pageStart = (current_page - 1) * Number(limit);
+      const pageEnd = pageStart + Number(limit);
+
+      if (pageStart > total_count) throw { status: 404, msg: "Page not found" };
+      const next_page =
+        pageEnd < total_count ? nextPageURL(req, current_page) : null;
 
       res.status(200).send({
         articles: articles.slice(pageStart, pageEnd),
