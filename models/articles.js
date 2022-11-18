@@ -2,12 +2,7 @@ const db = require("../db/connection");
 const format = require("pg-format");
 const { exists } = require("./utils");
 
-exports.selectArticles = async (
-  topic,
-  sort_by = "created_at",
-  order = "DESC"
-) => {
-  order = order.toUpperCase();
+exports.selectArticles = async (topic, sort_by, order) => {
   const sortable = [
     "article_id",
     "title",
@@ -34,7 +29,7 @@ exports.selectArticles = async (
   );
 
   return db.query(sql).then((articles) => {
-    return articles.rows;
+    return { articles: articles.rows, total_count: articles.rowCount };
   });
 };
 

@@ -5,12 +5,36 @@ const {
   insertArticle,
   deleteArticleById,
 } = require("../models/articles");
+const { nextPageURL } = require("./utils");
 
 exports.getArticles = (req, res, next) => {
-  const { topic, sort_by, order } = req.query;
-  selectArticles(topic, sort_by, order)
-    .then((articles) => {
-      res.status(200).send({ articles });
+  const {
+    topic,
+    sort_by = "created_at",
+    order = "DESC",
+    limit = 10,
+    p = 1,
+  } = req.query;
+
+  if (!(p > 0) || !(limit > 0))
+    throw { status: 400, msg: "Invalid limit or p (page) query" };
+
+  selectArticles(topic, sort_by, order.toUpperCase())
+    .then(({ articles, total_count }) => {
+      const current_page = Number(p);
+      const pageStart = (current_page - 1) * Number(limit);
+      const pageEnd = pageStart + Number(limit);
+
+      if (pageStart > total_count) throw { status: 404, msg: "Page not found" };
+      const next_page =
+        pageEnd < total_count ? nextPageURL(req, current_page) : null;
+
+      res.status(200).send({
+        articles: articles.slice(pageStart, pageEnd),
+        total_count,
+        current_page,
+        next_page,
+      });
     })
     .catch(next);
 };
