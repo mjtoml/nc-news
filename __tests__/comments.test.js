@@ -71,23 +71,100 @@ describe("/api/articles/:article_id/comments", () => {
         });
     });
 
-    test("accepts a limit query which limits the number of responses", () => {});
+    test("accepts a limit query which limits the number of responses", () => {
+      return request(app)
+        .get("/api/articles/1/comments?limit=2")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.comments).toHaveLength(2);
+        });
+    });
 
-    test("limit query defaults to 10", () => {});
+    test("limit query defaults to 10", () => {
+      return request(app)
+        .get("/api/articles/1/comments")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.comments).toHaveLength(10);
+        });
+    });
 
-    test("accepts a p query which specifies the page at which to start", () => {});
+    test("accepts a p query which specifies the page at which to start", () => {
+      return request(app)
+        .get("/api/articles/1/comments?limit=2")
+        .expect(200)
+        .then(({ body: { current_page, next_page } }) => {
+          expect(current_page).toBe(1);
+          const secondPage = new URL(next_page);
+          return request(app)
+            .get(secondPage.pathname + secondPage.search)
+            .expect(200);
+        })
+        .then(({ body: { current_page, next_page } }) => {
+          expect(current_page).toBe(2);
+          const thirdPage = new URL(next_page);
+          return request(app)
+            .get(thirdPage.pathname + thirdPage.search)
+            .expect(200);
+        })
+        .then(({ body: { current_page } }) => {
+          expect(current_page).toBe(3);
+        });
+    });
 
-    test("p query defaults to 1", () => {});
+    test("p query defaults to 1", () => {
+      return request(app)
+        .get("/api/articles/1/comments")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.current_page).toBe(1);
+        });
+    });
 
-    test("responds with a total_count property displaying the total number of articles", () => {});
+    test("responds with a total_count property displaying the total number of comments for the article, discounting the limit", () => {
+      return request(app)
+        .get("/api/articles/1/comments?limit=1")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.total_count).toBe(11);
+        });
+    });
 
-    test("responds with 400 if the limit query is invalid", () => {});
+    test("responds with 400 if the limit query is invalid", () => {
+      return request(app)
+        .get("/api/articles/1/comments?limit=dog")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Invalid limit or p (page) query");
+        });
+    });
 
-    test("responds with 400 if the p query is invalid", () => {});
+    test("responds with 400 if the p query is invalid", () => {
+      return request(app)
+        .get("/api/articles/1/comments?p=dog")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Invalid limit or p (page) query");
+        });
+    });
 
-    test("responds with 404 if the page specified does not exist", () => {});
+    test("responds with 404 if the page specified does not exist", () => {
+      return request(app)
+        .get("/api/articles/1/comments?p=1000")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Page not found");
+        });
+    });
 
-    test("next_page should be null if there are no more pages", () => {});
+    test("next_page should be null if there are no more pages", () => {
+      return request(app)
+        .get("/api/articles/1/comments?limit=1000&p=1")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.next_page).toBe(null);
+        });
+    });
   });
 
   describe("POST", () => {

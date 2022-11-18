@@ -7,7 +7,7 @@ exports.selectCommentsByArticleId = (article_id) => {
       [article_id]
     )
     .then((comments) => {
-      return comments.rows;
+      return { comments: comments.rows, total_count: comments.rowCount };
     });
 };
 
